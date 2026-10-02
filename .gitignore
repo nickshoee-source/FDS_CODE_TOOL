@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+# client working files - drop workbooks here, never commit them
+work/
+~$*.xlsx
