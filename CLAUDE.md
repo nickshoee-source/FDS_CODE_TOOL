@@ -25,6 +25,11 @@ opens the file in Excel (FactSet add-in), refreshes, and sends back the refreshe
 8. Keep a "Change Log" sheet in edited client files. Never overwrite the user's FDSRC spill results.
 9. Save new versions as new files (`..._V2.xlsx`); never edit the user's original in place.
 
+## Frequency codes (first argument of every FF_/FFI_/FB_ code)
+`QTR` = quarter, `QTR_R` = quarter rolling (user's definition; older notes said "restated" — see guide
+§3.1), `ANN` = annual, `LTM` = last twelve months. FFI_ uses `ANN_L` / `LTM_L`. Estimates use their own
+rolling forms `QTR_ROLL` / `ANN_ROLL` / `NTMA`. Example: `FF_ASSETS(QTR,"&E$5&")`, `FF_EPS(QTR_R,"&E$5&")`.
+
 ## Tools (run from the project root)
 | Command | Purpose |
 |---|---|

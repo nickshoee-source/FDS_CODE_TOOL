@@ -71,13 +71,30 @@
 
 ## 3. Arguments: periodicity, period, currency
 
-### 3.1 Periodicity (first argument)
+### 3.1 Periodicity / frequency (first argument)
+The first argument inside the code is the **frequency** of the data:
+
+| Frequency | Meaning |
+|---|---|
+| `QTR` | quarter |
+| `QTR_R` | quarter rolling (user's definition — see the note below) |
+| `ANN` | annual |
+| `LTM` | last twelve months |
+
+> **To confirm:** earlier notes described the `_R` suffix (`QTR_R`, `ANN_R`) as **restated**. The user describes
+> `QTR_R` as **quarter rolling**. The Oct 2026 test fits either reading: `FF_EFF_RATIO(QTR_R)` and
+> `FF_BK_EFF_RATIO(QTR)` matched in the latest quarter but differed by ~1pt in older HBAN quarters. Don't mix
+> it up with the **estimates** rolling forms `QTR_ROLL` / `ANN_ROLL` (FE_ only, §4). Use whichever frequency
+> the verified example in §6 / the catalog uses.
+
+Full list seen in client files:
+
 | Code | Meaning | Seen with |
 |---|---|---|
-| `QTR` | quarterly as originally reported | FF_, FB_ |
-| `QTR_R` | quarterly, restated | FF_ |
-| `ANN` | annual as reported | FF_, FB_ |
-| `ANN_R` | annual restated | FF_ |
+| `QTR` | quarter (as reported) | FF_, FB_ |
+| `QTR_R` | quarter rolling (user) / restated (earlier notes) | FF_ |
+| `ANN` | annual (as reported) | FF_, FB_ |
+| `ANN_R` | annual, `_R` form (rolling / restated — as `QTR_R`) | FF_ |
 | `ANN_L` | annual, **latest** filing (FFI convention) | FFI_ |
 | `LTM` | last twelve months | FF_PAY_OUT_RATIO(LTM,…) |
 | `LTM_L`, `LTM_SEMI_L` | FFI LTM / LTM built from semi-annual reporters | FFI_ |
