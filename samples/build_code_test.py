@@ -379,7 +379,7 @@ def camels_sheet():
     ID_ROW, NAME_ROW, FIRST = 6, 7, 8
     header_block(ws, 'Annual code test - FFI vs FF vs FB, and the @ fallback chain',
                  'Each metric is pulled four ways: FFI_, FF_, FB_ (US banks only) and the FFI@FF@FB chain. '
-                 'This shows which family works per bank and whether the cross-family chain fills in. '
+                 'This shows which family works per bank; the chain takes the first one that returns a number. '
                  '$ in millions USD; % as whole numbers.',
                  [('Fiscal year', FY)], ID_ROW, ids)
     label_cols(ws, NAME_ROW, '', 'Company name', 'FG_COMPANY_NAME', 'Verified')
@@ -400,7 +400,7 @@ def camels_sheet():
             variants.append((f'{metric} - CHAIN (FFI@FF@FB)', '@'.join(x for _, x in variants)))
         for k, (lab, fql) in enumerate(variants):
             is_chain = 'CHAIN' in lab
-            label_cols(ws, row, '', lab, short_code(fql), 'Unproven chain' if is_chain else status(fql))
+            label_cols(ws, row, '', lab, short_code(fql), 'Chain' if is_chain else status(fql))
             if is_chain:
                 ws.cell(row, 4).font = STATUS_FONT['Untested']
                 ws.cell(row, 2).font = BOLD
@@ -510,7 +510,7 @@ def timeseries_sheet():
     fql = (f'FE_TIMESERIES_GUIDANCE(COST_INCOME,LOW,"&$E${PROW}&","&${last}${PROW}&",FQ,'
            f"'BKRACTMED=1,WIN=0,CURRENCY=RPT,UNITS=AUTO,DATE=NOW')")
     label_cols(ws, row, '', 'Efficiency ratio guidance - low (%)', 'FE_TIMESERIES_GUIDANCE(COST_INCOME,LOW)',
-               'Untested')
+               status('FE_TIMESERIES_GUIDANCE(COST_INCOME,'))
     ws.cell(row, 5, f'=FDSRC("-",$C$3,"{fql}")').font = ARIAL
     for j in range(len(EST_Q)):
         ws.cell(row, 5 + j).number_format = FMT['PCT']
@@ -537,7 +537,7 @@ def write_readme():
         ('Quarterly - Peers      ~65 quarterly codes for HBAN, FITB, RF, KEY, PNC in one quarter (C3).', ''),
         ('HBAN Quarterly         the same codes for HBAN across 8 quarters (2024/3F - 2026/2F).', ''),
         ('Annual - CAMELS Test   25 CAMELS metrics pulled via FFI_, FF_, FB_ and the FFI@FF@FB chain, for 3 US and', ''),
-        ('                       3 global banks (HSBA-GB, SAN-ES, NAB-AU). Tests whether cross-family chains work.', ''),
+        ('                       3 global banks (HSBA-GB, SAN-ES, NAB-AU). Shows which family works per bank.', ''),
         ('Estimates - Peers      consensus NTM / FY1 / FY2, valuation, next quarter and LTM actuals (FE_).', ''),
         ('HBAN Estimates TS      FE_TIMESERIES spills for 12 future quarters (one formula per row in column E).', ''),
         ('', ''),
@@ -545,7 +545,8 @@ def write_readme():
         ('Verified        the code returned numbers in an earlier refreshed file.', ''),
         ('Untested        the code is in FactSet\'s code lists but has not been tested yet.', ''),
         ('Not in catalog  the code is not in FactSet\'s code lists - most likely to fail.', ''),
-        ('Unproven chain  cross-family @ fallback (FFI@FF@FB) - check it fills in where a single family works.', ''),
+        ('Chain           cross-family @ fallback (FFI@FF@FB) - proven in the Oct 2026 refresh; takes the first', ''),
+        ('                family that returns a number, even a wrong one (check outliers).', ''),
         ('Cell math       calculated in Excel from the rows above.', ''),
         ('', ''),
         ('Units', 'h'),

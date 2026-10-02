@@ -30,6 +30,7 @@ opens the file in Excel (FactSet add-in), refreshes, and sends back the refreshe
 |---|---|
 | `python tools/find_code.py <words> [--family FFI] [--verified]` | search 9,684 FactSet codes |
 | `python tools/harvest_codes.py REFRESHED.xlsx` | which codes returned data after the user refreshed |
+| `python tools/update_catalog.py REFRESHED.xlsx --source "label"` | mark codes that returned numbers as VERIFIED in the catalog |
 | `python tools/check_workbook.py NEW.xlsx --original OLD.xlsx [--fix-highlights OUT.xlsx]` | hygiene, yellow==changed, parse check |
 | `from tools.fds_kit import *` | formula builders (`fds`, `fdsc`, `fdsrc`, `ifna`, `future_gate`, `chain`, `ff`, `ffi`, `fb`, `fe_timeseries`, `fe_estimate`), styles (`THEMES['quarterly'|'red']`, `FMT`), `highlight_changes`, `write_change_log`, `freeze`, `restore_sensitivity_label` |
 

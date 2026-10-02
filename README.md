@@ -37,6 +37,7 @@ change Claude makes can be reviewed and undone.
 | `tools/fds_kit.py` | formula builders, styles, change highlighting, verification |
 | `tools/find_code.py` | search codes: `python tools/find_code.py net interest margin --verified` |
 | `tools/harvest_codes.py` | after a refresh: which codes returned data |
+| `tools/update_catalog.py` | after a refresh: mark working codes VERIFIED in the catalog |
 | `tools/check_workbook.py` | pre-delivery checks (hygiene, yellow == changed, parse) |
 | `examples/` | past build scripts (patterns only) |
 | `samples/HBAN_FDS_Code_Test_SAMPLE.xlsx` | test workbook (~1,700 formulas) for HBAN, peers and 3 global banks; rebuild with `python samples/build_code_test.py` |

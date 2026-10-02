@@ -44,5 +44,9 @@ Read `docs/FactSet_FDS_Coding_Guide.md` first (syntax, families, verified codes,
   mismatches 0, no parse errors.
 - Re-read 2–3 formulas per changed row; confirm references point at the right ID/period cells.
 
-## 6. Report to the user (short)
+## 6. When a refreshed file comes back
+- Save it under `work/` (git-ignored), run `python tools/update_catalog.py work/FILE.xlsx --source "..."`,
+  then check values for sense (units, outliers, families disagreeing) and add warnings to the guide/catalog.
+
+## 7. Report to the user (short)
 - What changed (by worksheet), codes used, the "please confirm" list, what was NOT changed and why.

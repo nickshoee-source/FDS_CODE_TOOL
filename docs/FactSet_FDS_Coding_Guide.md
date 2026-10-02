@@ -155,7 +155,8 @@ FE_ESTIMATE_DATE(RPT_DATE,,QTR_ROLL,+1,'MM/DD/YYYY',0,,,'')    next report date 
 
 - **Proven:** same-family chains, e.g. the client's LTM sheet
   `FFI_COM_EQ_TIER1_RATIO(LTM_L,0)@FFI_COM_EQ_TIER1_RATIO(LTM_SEMI_L,0)` returned data.
-- **Unproven / caution:** **cross-family** chains (`FFI_…@FF_…@FB_…`). In one test the user reported mixed FFI+FF cells returned nothing. The current CAMELS V5 file uses cross-family chains on the user's request — **always test on 5 companies before rolling out**, and if a row goes blank, remove one code at a time (an invalid code anywhere in the chain can blank the whole cell).
+- **Proven (Oct 2026 code test):** **cross-family** chains `FFI_…@FF_…@FB_…` work. In `samples/HBAN_FDS_Code_Test_SAMPLE.xlsx` every CAMELS chain returned data wherever a single family did (FITB leverage: FFI and FF blank → chain took FB's 9.41). An earlier report of mixed cells coming back empty was not reproduced — if a row goes blank, remove one code at a time (an invalid code anywhere in the chain may blank the whole cell). Still sample 5 companies before a big rollout.
+- **The chain takes the first number, even a wrong one:** HBAN FY2025 leverage came back **99.95** from both FFI_ and FF_, so the chain returned 99.95 instead of FB's 9.25. Put the most reliable family first for the universe (FB_ first for US-only screens).
 - **Ratios:** fall back item-by-item: `(LOANS_FFI@LOANS_FF@LOANS_FB)/(DEPS_FFI@DEPS_FF@DEPS_FB)`.
 - To convert a whole-number % to a fraction: `"(A@B@C)/100"` (parenthesize the chain).
 - `@` does **not** trigger on a returned `0`, and probably not on the FG-23 "company not found" error.
@@ -176,7 +177,7 @@ Pattern: `=_xlfn.IFNA(FDS($D8,"CODE(PERIODICITY,"&E$5&")"),"-")`
 | TSR | `P_PRICE_RETURNS(2,"&E$5&","&F$5&")` | whole % (do **not** /100); start = this quarter, end = next quarter's header |
 | Dividend yield | `FF_DIV_YLD(QTR)` | % |
 | Payout ratio | `FF_PAY_OUT_RATIO(QTR)` (or LTM) | % |
-| Dividends paid | `FF_DIV_CF(QTR)` | $M |
+| Dividends paid | `FF_DIV_CF(QTR)` ✔ | $M |
 | Share repurchases | `FF_SHS_REPURCH(TOTAL_VAL_REPURCH,QTR,"&E$5&")` | $M |
 | DPS | `FF_DPS(QTR)` | $ |
 | Shares outstanding | `FF_COM_SHS_OUT(QTR_R)` | millions |
@@ -187,7 +188,7 @@ Pattern: `=_xlfn.IFNA(FDS($D8,"CODE(PERIODICITY,"&E$5&")"),"-")`
 | EPS / Net income / PPNR | `FF_EPS(QTR_R)` / `FF_NET_INC(QTR)` / `FF_PPNR(QTR)` | |
 | Effective tax rate | `FF_TAX_RATE(QTR_R)` | % |
 | NII / Non-interest income | `FF_INT_INC_NET(QTR_R)` / `FF_NON_INT_INC(QTR)` | $M; revenue = sum |
-| Efficiency ratio | `FF_EFF_RATIO(QTR_R)` **×100** (returns fraction) — or `FF_BK_EFF_RATIO` (whole %) | % |
+| Efficiency ratio | `FF_EFF_RATIO(QTR_R)` **×100** (returns fraction) — or `FF_BK_EFF_RATIO` (whole %) | % — the two match for the latest quarter but differed by ~1pt in older HBAN quarters (restated vs as reported) |
 | NIE / Personnel | `FF_NON_INT_EXP(QTR)` / `FF_LABOR_EXP(QTR)` | $M |
 | NIM | `FB_INT_MGN(QTR)` | % |
 | Earning-asset yield | `FF_YLD_INT_EARN_ASSETS(QTR_R)` | % |
@@ -195,15 +196,15 @@ Pattern: `=_xlfn.IFNA(FDS($D8,"CODE(PERIODICITY,"&E$5&")"),"-")`
 | Avg interest-bearing liabilities | `FF_BK_AVG_LIABS_INTB(QTR_TOT)` | $M |
 | Cost of funds | cell math `(IntExp / AvgIBL)*100*4` | % annualized |
 | Deposit cost | `FF_COST_DEPS(QTR)` **×4** (quarterly rate) | % |
-| IB liability cost | `FF_BK_INT_COST_INTB_AVG(QTR)` | % (duplicated cost of funds in test) |
-| Funding cost | `FF_BK_COST(QTR_NINTB_LIABS)` | % (duplicated cost of funds in test) |
+| IB liability cost | `FF_BK_INT_COST_INTB_AVG(QTR)` | % — **equals cost of funds** (confirmed for 5 banks) |
+| Funding cost | `FF_BK_COST(QTR_NINTB_LIABS)` | % — **equals cost of funds** (confirmed for 5 banks) |
 | Net interest spread / TE NIM | `FF_BK_INT_SPREAD(QTR)` / `FF_BK_INT_MGN_TAX_EQV(QTR)` | % |
 | Total assets / liabilities / intangibles | `FF_ASSETS(QTR)` / `FF_LIABS(QTR_R)` / `FF_INTANG(QTR_R)` | $M |
 | Average assets | `FF_BK_AVG_ASSETS(QTR)` | $M |
 | Avg earning assets | `FF_BK_AVG_ASSETS(QTR_INTE)` | $M (it is an **average**, not EOP) |
 | Total loans | `FF_BK_LOAN_TOT(QTR)` | $M |
 | Deposits | `FF_DEPS(QTR)`, `FF_DEPS_INTB(QTR)`, `FF_DEPS_NINTB(QTR)` | $M |
-| TCE / avg TCE | `FF_COM_EQ_TANG(QTR)` / `FF_BK_SUPPL_AVG(QTR_TCE)` | $M |
+| TCE / avg TCE | `FF_COM_EQ_TANG(QTR)` / `FF_BK_SUPPL_AVG(QTR_TCE)` | $M — avg TCE lags: latest quarter empty for all 5 banks |
 | TBVPS | `FF_BPS_TANG(QTR)` | $ |
 | NCO ratio | `FF_CHARGE_OFFS_LOANS_PCT(QTR_R)` **×4** | % annualized |
 | NPL ratio / NPA ratio | `FF_NONPERF_LOAN_PCT(QTR_R)` / `FF_NPA_ASSETS_PCT(QTR)` | % |
@@ -221,25 +222,25 @@ Annual (HBAN master, `ANN`/`ANN_R`, period 0): `FF_BK_EFF_RATIO`, `FF_BK_LEV_RAT
 
 | Metric | FFI (primary) | FF fallback | FB fallback (US only) |
 |---|---|---|---|
-| CET1 capital | `FFI_COM_EQ_TIER1_TOT(ANN_L,{Y},,,,USD)` ✔ | `FF_BK_COM_EQ_TIER1_TOT` (unconfirmed) | `FB_COM_EQ_TIER1(ANN,{Y},,,RF,USD)` |
+| CET1 capital | `FFI_COM_EQ_TIER1_TOT(ANN_L,{Y},,,,USD)` ✔ | `FF_BK_COM_EQ_TIER1_TOT` ✔ | `FB_COM_EQ_TIER1(ANN,{Y},,,RF,USD)` ✔ |
 | CET1 ratio | `FFI_COM_EQ_TIER1_RATIO` ✔ | `FF_BK_COM_EQ_TIER1_RATIO` ✔ | `FB_COM_EQ_TIER1_RATIO` ✔ |
-| Tier 1 capital | `FFI_TIER1_CAP …USD` ✔ | `FF_TIER1_CAP` | `FB_TIER1_CAP` |
-| Tier 1 ratio | `FFI_CAP_RATIO_TIER1` ✔ | `FF_CAP_RATIO_TIER1` | `FB_CAP_RATIO_TIER1` |
-| Total capital ratio | `FFI_CAP_RATIO_TOT` ✔ | `FF_CAP_RATIO_TOT` | `FB_CAP_RATIO_TOT` |
-| Leverage ratio | `FFI_LEV_RATIO_RPT` (reported) — *not* `_ADVT` (advanced approach, 51/669 banks) | `FF_BK_LEV_RATIO` ✔ | `FB_LEV_RATIO` |
-| RWA | `FFI_RWA …USD` ✔ | `FF_ASSETS_RISK_WGHT` ✔ | `FB_ASSETS_RISK_WGHT` |
-| NPLs | `FFI_NPL_LOAN_ADV` | `FF_LOAN_NONPERF` ✔ | `FB_NONPERF_LOAN` |
-| Provision | `FFI_LOAN_LOSS_PROV` | `FF_LOAN_LOSS_PROV` ✔ | `FB_LOAN_LOSS_PROV` |
-| NPL / allowance | `FFI_NPL_LOAN_LOSS_RSRV_RATIO` (÷100 for fraction) | `FF_NONPERF_LOAN_LOSS_RSRV` | — |
-| NPL / loans | `FFI_NPL_LOAN_RATIO` (user-supplied, e.g. `FFI_NPL_LOAN_RATIO(ANN_L,0)`) | `FF_NONPERF_LOAN_PCT` ✔ | `FB_NONPERF_LOAN_PCT` |
-| Efficiency | `FFI_EFF_RATIO` ✔ (whole %) | `FF_BK_EFF_RATIO` ✔ | `FB_EFF_RATIO` |
-| ROTE | `FFI_ROTE` ✔ | — | `FB_ROTE` |
+| Tier 1 capital | `FFI_TIER1_CAP …USD` ✔ | `FF_TIER1_CAP` ✔ | `FB_TIER1_CAP` ✔ |
+| Tier 1 ratio | `FFI_CAP_RATIO_TIER1` ✔ | `FF_CAP_RATIO_TIER1` ✔ | `FB_CAP_RATIO_TIER1` ✔ |
+| Total capital ratio | `FFI_CAP_RATIO_TOT` ✔ | `FF_CAP_RATIO_TOT` ✔ | `FB_CAP_RATIO_TOT` ✔ |
+| Leverage ratio | `FFI_LEV_RATIO_RPT` ✔ (reported) — *not* `_ADVT` (advanced approach, 51/669 banks). ⚠ HBAN FY2025 = 99.95 | `FF_BK_LEV_RATIO` ✔ (⚠ same 99.95) | `FB_LEV_RATIO` ✔ — use first for US banks |
+| RWA | `FFI_RWA …USD` ✔ | `FF_ASSETS_RISK_WGHT` ✔ | `FB_ASSETS_RISK_WGHT` ✔ |
+| NPLs | `FFI_NPL_LOAN_ADV` ✔ | `FF_LOAN_NONPERF` ✔ | `FB_NONPERF_LOAN` ✔ |
+| Provision | `FFI_LOAN_LOSS_PROV` ✔ | `FF_LOAN_LOSS_PROV` ✔ | `FB_LOAN_LOSS_PROV` ✔ |
+| NPL / allowance | `FFI_NPL_LOAN_LOSS_RSRV_RATIO` ✔ (whole %; ÷100 for fraction) | `FF_NONPERF_LOAN_LOSS_RSRV` ✔ | — |
+| NPL / loans | `FFI_NPL_LOAN_RATIO` ✔ | `FF_NONPERF_LOAN_PCT` ✔ | `FB_NONPERF_LOAN_PCT` ✔ |
+| Efficiency | `FFI_EFF_RATIO` ✔ (whole %) | `FF_BK_EFF_RATIO` ✔ | `FB_EFF_RATIO` ✔ |
+| ROTE | `FFI_ROTE` ✔ | — | `FB_ROTE` ✔ |
 | ROTCE | `FFI_ROTCE` ✔ | `FF_ROTCE` ✔ | `FB_ROTCE` ✔ |
-| ROA | `FFI_ROA` ✔ | `FF_ROA` ✔ | `FB_ROA` |
-| NIM | `FFI_AVG_BAL_INT_RATE_NET_MGN` — **not** `FFI_NIM_NIS_DIFF` (= NIM minus spread) | `FF_INT_MGN` | `FB_INT_MGN` ✔ |
-| NII / Non-II | `FFI_INT_INC_NET` ✔ / `FFI_NON_INT_INC` ✔ | `FF_INT_INC_NET` ✔ / `FF_NON_INT_INC` ✔ | `FB_INT_INC_NET` / `FB_NON_INT_INC` |
-| Loans | `FFI_LOAN_ADV_TOT` ✔ | `FF_BK_LOAN_TOT` ✔ | `FB_TOT_HFI_HFS_UNEARN_INC` |
-| Deposits | `FFI_DEPS_TOT` ✔ | `FF_DEPS` ✔ | `FB_DEPS` |
+| ROA | `FFI_ROA` ✔ | `FF_ROA` ✔ | `FB_ROA` ✔ |
+| NIM | `FFI_AVG_BAL_INT_RATE_NET_MGN` ✔ but sparse (1 of 6 banks) — **not** `FFI_NIM_NIS_DIFF` (= NIM minus spread) | `FF_INT_MGN` (2 of 6) | `FB_INT_MGN` ✔ |
+| NII / Non-II | `FFI_INT_INC_NET` ✔ / `FFI_NON_INT_INC` ✔ | `FF_INT_INC_NET` ✔ / `FF_NON_INT_INC` ✔ | `FB_INT_INC_NET` ✔ / `FB_NON_INT_INC` ✔ |
+| Loans | `FFI_LOAN_ADV_TOT` ✔ (⚠ SAN-ES looked overstated) | `FF_BK_LOAN_TOT` ✔ (⚠ ANN_R high for HBAN/FITB) | `FB_TOT_HFI_HFS_UNEARN_INC` ✔ |
+| Deposits | `FFI_DEPS_TOT` ✔ | `FF_DEPS` ✔ | `FB_DEPS` ✔ |
 | LCR | `FFI_BK_LIQ_COVG_RATIO` ✔ | `FF_BK_LIQ_COVG_RATIO` ✔ | — |
 | NSFR | `FFI_BK_NSFR` ✔ | — | — |
 | Loans to customers @ amortized cost | `FFI_LOAN_AMORT_CUST …USD` ✔ | `FF_LOAN_NET` (proxy) | `FB_TOT_HFI_HFS_UNEARN_INC` (proxy) |
@@ -247,7 +248,8 @@ Annual (HBAN master, `ANN`/`ANN_R`, period 0): `FF_BK_EFF_RATIO`, `FF_BK_LEV_RAT
 | Investments + derivatives + FVTPL | `FFI_SECS_INVEST + FFI_TRADE_ACCT + FFI_DERIV_HEDGE` | `FF_INVEST_TOT` (unconfirmed) | — |
 | Customer deposits share | `FFI_DEPS / FFI_DEPS_TOT` ✔ | `FF_DEPS_CUST` (unconfirmed) / `FF_DEPS` | `FB_DEPS` |
 
-✔ = returned real numbers in a refreshed client file.
+✔ = returned real numbers in a refreshed file (the Oct 2026 code test added 28 codes, all FB fallbacks included).
+FFI_ and FF_ can disagree for global banks (SAN-ES / NAB-AU NPLs, NPL ratios, loans) — they use different definitions; keep one family per column and check outliers.
 
 ### 6.3 Global banks — LTM and estimates (CAMELS NTM/Estimate/LTM sheets)
 - LTM (FFI): `FFI_X(LTM_L,0)@FFI_X(LTM_SEMI_L,0)`; FF balance items: `FF_LOAN_NONPERF(LTMSG,0,,,,USD)`.
@@ -255,6 +257,9 @@ Annual (HBAN master, `ANN`/`ANN_R`, period 0): `FF_BK_EFF_RATIO`, `FF_BK_LEV_RAT
 - NTM: `FE_ESTIMATE(ITEM,MEAN,NTMA,,NOW,,,'CURRENCY=USD')`; fiscal year: `FE_ESTIMATE(ITEM,MEAN,ANN_ROLL,"&C4&",NOW,,,'CURRENCY=USD')`.
 - Ratios from estimates: NPL/allowance = `LOAN_NONPERF/LOAN_LOSS_RSRV`; NPL/loans = `LOAN_NONPERF/LOAN_GROSS`; CET1 ratio = `COMCAP_RATIO_TIER1`.
 - There is **no LCR / NSFR / ROTCE estimate item** → write "estimates not available".
+- `FE_ESTIMATE(NETCHARGE_LOANNET,…,'CURRENCY=USD')` returns **#NUM!** (NTM and FY, 5 US banks); use `FE_TIMESERIES_VALUATION(NETCHARGE_LOANNET,…)` or compute NET_CHARGE_OFFS / LOAN_GROSS.
+- `FE_TIMESERIES(COM_EQUITY_TIER1,…)` returned nothing for HBAN; use `COMCAP_RATIO_TIER1` (ratio) instead.
+- Consensus horizon: most FE_TIMESERIES items cover ~6 quarters ahead (EPS, revenue, DPS ~10); valuation items fill all 12 but repeat the last value. `FE_TIMESERIES_GUIDANCE` only fills the quarter the guidance targets.
 
 ---
 
@@ -301,6 +306,7 @@ Annual (HBAN master, `ANN`/`ANN_R`, period 0): `FF_BK_EFF_RATIO`, `FF_BK_LEV_RAT
 - Preserve multi-cell array spills (an `ArrayFormula` whose `ref` spans several cells).
 - openpyxl drops some package parts (e.g. Microsoft sensitivity label `docMetadata/LabelInfo.xml`); copy it back from the original zip if present.
 - **Verify before delivering:** LibreOffice headless convert to .ods and search for `Err:5xx` (formula parse errors); diff every cell against the original and confirm *changed ⇔ yellow*; render a small mock to PNG to eyeball formatting.
+- After the user refreshes a file: `python tools/update_catalog.py REFRESHED.xlsx --source "..."` marks every code that returned numbers as VERIFIED in the catalog.
 - Look up codes fast: `grep -i "net interest margin" FactSet_Code_Catalog.csv`, filter the "Verified" column first.
 
 ---
