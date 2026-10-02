@@ -39,6 +39,7 @@ change Claude makes can be reviewed and undone.
 | `tools/harvest_codes.py` | after a refresh: which codes returned data |
 | `tools/check_workbook.py` | pre-delivery checks (hygiene, yellow == changed, parse) |
 | `examples/` | past build scripts (patterns only) |
+| `samples/HBAN_FDS_Code_Test_SAMPLE.xlsx` | test workbook (~1,700 formulas) for HBAN, peers and 3 global banks; rebuild with `python samples/build_code_test.py` |
 
 ## Confidentiality
 This repository is public. Client workbooks (refreshed files, deliverables, instructions) are **not**
